@@ -2,15 +2,9 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const dotenv = require('dotenv');
+const userRoute = require('./routes/user');
 
-// mongoose.set("strictQuery",false);
-// mongoose
-//     .connect("mongodb+srv://admin:adeva10MEI2002@testingapiv1.ojgr6ub.mongodb.net/shop?retryWrites=true&w=majority"
-//     )
-//     .then(() => console.log("Db Connected"))
-//     .catch((err) =>{
-//         console.log(err.message);
-//     });
 
 const uri = "mongodb+srv://admin:adeva10MEI2002@testingapiv1.ojgr6ub.mongodb.net/shop?retryWrites=true&w=majority";
     // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -35,7 +29,10 @@ const client = new MongoClient(uri, {
     }
     run().catch(console.dir);
 
+app.use(express.json());
+
+app.use("/api/user", userRoute);
 
 app.listen(3000, () => {
-    console.log('Backend is Running...');
+    console.log('Backend is Running in server http://localhost:3000');
 });
