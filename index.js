@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const dotenv = require('dotenv');
 const userRoute = require('./routes/user');
-const authRoute = require('./routes/auth');
+const authRoute = require('./middleware/auth');
+const listEndpoints = require('express-list-endpoints');
 
 dotenv.config();
 
@@ -23,3 +24,7 @@ app.use("/api/auth", authRoute);
 app.listen(3000, () => {
     console.log('Backend is Running in server http://localhost:3000');
 });
+
+// Dapatkan daftar route yang sudah dibuat
+const endpoints = listEndpoints(app);
+console.log(endpoints);
