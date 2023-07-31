@@ -1,13 +1,12 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const { MongoClient, ServerApiVersion } = require('mongodb');
 const dotenv = require('dotenv');
 const userRoute = require('./routes/user');
 const authRoute = require('./middleware/auth');
 const listEndpoints = require('express-list-endpoints');
 
-dotenv.config();
+require('dotenv').config();
 
 mongoose
   .connect(process.env.MONGO_URL)
