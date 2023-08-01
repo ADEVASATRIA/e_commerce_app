@@ -6,6 +6,8 @@ const userRoute = require('./routes/user');
 const authRoute = require('./middleware/auth');
 const listEndpoints = require('express-list-endpoints');
 const productRoute = require('./routes/products');
+const orderRoute = require('./routes/order');
+const cartRoute = require('./routes/cart');
 
 require('dotenv').config();
 
@@ -21,6 +23,8 @@ app.use(express.json());
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/products", productRoute);
+app.use("/api/orders", orderRoute);
+app.use("/api/cart", cartRoute);
 
 
 app.listen(3000, () => {

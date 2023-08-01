@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const OrderSchema = new Mongoose.Schema(
+const OrderSchema = new mongoose.Schema(
     {
-        userId: { typeof: 'string' , required: true},
+        userId: { type: 'string' , required: true},
         products: [
             {
                 productsId: {
@@ -20,3 +20,5 @@ const OrderSchema = new Mongoose.Schema(
     },
     { timstamps: true }
 );
+
+module.exports = mongoose.model("Order", OrderSchema);
