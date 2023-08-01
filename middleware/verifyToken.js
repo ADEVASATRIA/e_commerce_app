@@ -1,26 +1,20 @@
 const jwt = require('jsonwebtoken');
-const CryptoJS = require('crypto-js');
-const express = require('express');
-const app = express();
-
 
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
 
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
             if (err) {
-                // Tangani token tidak valid atau gagal diverifikasi
                 return res.status(403).json({ error: "Token tidak valid!" });
             }
 
-            req.user = user; // Tetapkan objek user yang berhasil diverifikasi ke req.user
+            req.user = user;
             next();
         });
     } else {
-        // Tangani kasus ketika token tidak diberikan
         return res.status(401).json({ error: "Anda tidak terautentikasi!" });
     }
 };
@@ -28,21 +22,20 @@ const verifyToken = (req, res, next) => {
 // Middleware For check token dan permission
 const verifyTokenAndAuthorization = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (authHeader) {
-        const token = authHeader.split(" ")[1];
-        jwt.verify(token, process.env.JWT_SECRET , (err, user) => {
-        if (err) {
-            console.error("Token tidak valid:", err);
-            return res.status(403).json("Token tidak valid!");
-        }
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (err) {
+                console.error("Token tidak valid:", err);
+                return res.status(403).json("Token tidak valid!");
+            }
 
-        console.log("User yang berhasil diverifikasi:", user);
-        if (user.id === req.params.id || user.isAdmin) {
-            req.user = user; // Tetapkan objek user yang berhasil diverifikasi ke req.user
-            next();
-        } else {
-            res.status(403).json("Anda tidak diizinkan untuk melakukan ini!");
-        }
+            if (user.id === req.params.id || user.isAdmin) {
+                req.user = user;
+                next();
+            } else {
+                res.status(403).json("Anda tidak diizinkan untuk melakukan ini!");
+            }
         });
     } else {
         console.error("Token tidak diberikan");
@@ -50,5 +43,19 @@ const verifyTokenAndAuthorization = (req, res, next) => {
     }
 };
 
+const verifyTokenAndAdmin = (req, res, next) => {
+    verifyToken(req, res, (err) => {
+        if (err) {
+            return res.status(403).json("Anda tidak diizinkan untuk melakukan ini!");
+        }
 
-module.exports = {verifyToken, verifyTokenAndAuthorization};
+        if (req.user.isAdmin) {
+            next();
+        } else {
+            res.status(403).json("Anda tidak diizinkan untuk melakukan ini!");
+        }
+    });
+};
+
+
+module.exports = {verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin};

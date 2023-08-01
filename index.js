@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const userRoute = require('./routes/user');
 const authRoute = require('./middleware/auth');
 const listEndpoints = require('express-list-endpoints');
+const productRoute = require('./routes/products');
 
 require('dotenv').config();
 
@@ -19,6 +20,8 @@ app.use(express.json());
 
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
+app.use("/products", productRoute);
+
 
 app.listen(3000, () => {
     console.log('Backend is Running in server http://localhost:3000');

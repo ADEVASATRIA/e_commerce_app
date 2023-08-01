@@ -2,7 +2,7 @@ const router = require('express').Router();
 const User = require("../Models/User");
 const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
-const { verifyToken, verifyTokenAndAuthorization } = require('../middleware/verifyToken');
+const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require('../middleware/verifyToken');
 
 //REGISTER ROUTE
 router.post("/register", async (req, res) => {
@@ -83,7 +83,29 @@ router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-// SHOW ALL USER 
+
+// DELETE USER BY ID
+router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).json("User has been deleted");
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// // GET ALL USER Using ID BY USING middleware verifyTokenAndAdmin
+// router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.id);
+//         const { password, ...others } = user._doc;
+//         res.status(200).json(others);
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// });
+
+// SHOW ALL USER dengan middleware verifyToken
 router.get("/", verifyToken, async (req, res) => {
     try {
         // Mengambil semua data user dari database
@@ -96,7 +118,7 @@ router.get("/", verifyToken, async (req, res) => {
 });
 
 
-// UNTUK MELIHAT USER BY ID
+// UNTUK MELIHAT USER BY ID dengan middleware verifyTokenAndAuthorization
 router.get("/data/:id", verifyTokenAndAuthorization, (req, res) => {
     // Jika middleware berhasil diverifikasi, kita dapat mengakses req.user
     res.json({
@@ -106,4 +128,55 @@ router.get("/data/:id", verifyTokenAndAuthorization, (req, res) => {
     });
 });
 
+
+// GET USER STATUS 
+// router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
+//     const date = new Date();
+//     const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+
+//     try {
+//         const data = await User.aggregate([
+//         { $match: { createdAt: { $gte: lastYear } } },
+//             {
+//             $project: {
+//             month: { $month: "$createdAt" },
+//             },
+//         },
+//             {
+//             $group: {
+//             _id: "$month",
+//             total: { $sum: 1 },
+//             },
+//             },
+//         ]);
+//         res.status(200).json(data)
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// });
+
+
+// MENGGUNAKAN METODE FUNGSI SENDIRI DAN ROUTER SENDIRI UNTUK MELAKUKAN GET USER STATUS
+
+const getUserStatus = async (req, res) => {
+    const date = new Date();
+    const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+
+    try {
+        const data = await User.aggregate([
+            { $match: { createdAt: { $gte: lastYear } } },
+            { $project: { month: { $month: "$createdAt" } } },
+            { $group: { _id: "$month", total: { $sum: 1 } } },
+        ]);
+
+        res.status(200).json(data);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+};
+
+router.get('/status', getUserStatus)
+
+
+module.exports = { getUserStatus };
 module.exports = router;
